@@ -8,4 +8,6 @@ public class CafeConstants {
 
     public static final String UNAUTHORIZED_ACCESSS = "Acesso não autorizado.";
 
+    public static final String STORED_LOCATION = "C:\\Users\\joao.carlos\\Desktop\\teste";
+
 }

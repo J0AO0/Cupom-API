@@ -8,8 +8,10 @@ import com.joao.cafe.constents.CafeConstants;
 import com.joao.cafe.dao.UserDao;
 import com.joao.cafe.service.UserService;
 import com.joao.cafe.utils.CafeUtils;
+import com.joao.cafe.utils.EmailUtils;
 import com.joao.cafe.wrapper.UserWrapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,6 +40,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     JwtFilter jwtFilter;
+
+    @Autowired
+    EmailUtils emailUtils;
 
     @Override
     public ResponseEntity<String> signUp(Map<String, String> requestMap) {
@@ -121,18 +126,67 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseEntity<String> update(Map<String, String> requestMap) {
         try{
-            if(jwtFilter.isUser()){
+            if(jwtFilter.isAdmin()){
               Optional<User> optional =  userDao.findById(Integer.parseInt(requestMap.get("id")));
               if(!optional.isEmpty()) {
-                userDao.updateStatus();
+                userDao.updateStatus(requestMap.get("status"), Integer.parseInt(requestMap.get("id")));
+                sendMailToAllAdmin(requestMap.get("status"),optional.get().getEmail(),userDao.getAllAdmin());
+                return CafeUtils.getResponseEntity("Status do usuário alterado com sucesso.", HttpStatus.OK);
               }
               else{
-                  CafeUtils.getResponseEntity("Id do usuário não existe.",HttpStatus.OK);
+                  return CafeUtils.getResponseEntity("Id do usuário não existe.",HttpStatus.OK);
               }
             }else{
                 return CafeUtils.getResponseEntity(CafeConstants.UNAUTHORIZED_ACCESSS, HttpStatus.UNAUTHORIZED);
             }
         }catch (Exception ex){
+            ex.printStackTrace();
+        }
+        return CafeUtils.getResponseEntity(CafeConstants.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    private void sendMailToAllAdmin(String status, String user, List<String> allAdmin) {
+        allAdmin.remove(jwtFilter.getCurrentUser());
+        if(status != null && status.equalsIgnoreCase("true")){
+            emailUtils.sendSimpleMessage(jwtFilter.getCurrentUser(), "Conta Aprovada.", "USER: - "+user+"\n aprovada por \n ADMIN:-"+jwtFilter.getCurrentUser(),allAdmin);
+        }else {
+            emailUtils.sendSimpleMessage(jwtFilter.getCurrentUser(), "Conta Disabilitada.", "USER: - "+user+"\n aprovada por \n ADMIN:-"+jwtFilter.getCurrentUser(),allAdmin);
+        }
+    }
+
+    @Override
+    public ResponseEntity<String> checkToken() {
+        return CafeUtils.getResponseEntity("true",HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<String> changePassword(Map<String, String> requestMap) {
+        try{
+            User userObj = userDao.findByEmail(jwtFilter.getCurrentUser());
+            if(!userObj.equals(null)){
+                if(userObj.getPassword().equals(requestMap.get("oldPassword"))){
+                    userObj.setPassword(requestMap.get("newPassword"));
+                    userDao.save(userObj);
+                    return CafeUtils.getResponseEntity("Senha trocada com sucesso", HttpStatus.OK);
+                }
+                return CafeUtils.getResponseEntity("Senha antiga Incorreta.", HttpStatus.BAD_REQUEST);
+            }
+            return CafeUtils.getResponseEntity(CafeConstants.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch(Exception ex){
+            ex.printStackTrace();
+        }
+        return CafeUtils.getResponseEntity(CafeConstants.SOMETHING_WENT_WRONG,HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @Override
+    public ResponseEntity<String> forgotPassword(Map<String, String> requestMap) {
+        try{
+            User user =userDao.findByEmail(requestMap.get("email"));
+            if(!Objects.isNull(user) && !Strings.isNotEmpty(user.getEmail())){
+                emailUtils.forgotMail(user.getEmail(),"Credenciais do Sistema de gerenciamento do Cafe", user.getPassword());
+                return CafeUtils.getResponseEntity("Cheque seu email para obter as credenciais.",HttpStatus.OK);
+            }
+        }catch(Exception ex){
             ex.printStackTrace();
         }
         return CafeUtils.getResponseEntity(CafeConstants.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
