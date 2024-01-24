@@ -4,7 +4,7 @@ import com.joao.cafe.JWT.CostumerUsersDetailsService;
 import com.joao.cafe.JWT.JwtFilter;
 import com.joao.cafe.JWT.JwtUtil;
 import com.joao.cafe.POJO.User;
-import com.joao.cafe.constents.CafeConstants;
+import com.joao.cafe.constants.CafeConstants;
 import com.joao.cafe.dao.UserDao;
 import com.joao.cafe.service.UserService;
 import com.joao.cafe.utils.CafeUtils;

@@ -1,6 +1,6 @@
 package com.joao.cafe.restImpl;
 
-import com.joao.cafe.constents.CafeConstants;
+import com.joao.cafe.constants.CafeConstants;
 import com.joao.cafe.rest.UserRest;
 import com.joao.cafe.service.UserService;
 import com.joao.cafe.utils.CafeUtils;

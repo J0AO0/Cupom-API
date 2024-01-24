@@ -1,4 +1,4 @@
-package com.joao.cafe.constents;
+package com.joao.cafe.constants;
 
 public class CafeConstants {
 

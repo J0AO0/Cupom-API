@@ -1,7 +1,7 @@
 package com.joao.cafe.restImpl;
 
 import com.joao.cafe.POJO.Category;
-import com.joao.cafe.constents.CafeConstants;
+import com.joao.cafe.constants.CafeConstants;
 import com.joao.cafe.rest.CategoryRest;
 import com.joao.cafe.service.CategoryService;
 import com.joao.cafe.utils.CafeUtils;

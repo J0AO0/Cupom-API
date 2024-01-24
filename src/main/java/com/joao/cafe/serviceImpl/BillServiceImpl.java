@@ -6,7 +6,7 @@ import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.joao.cafe.JWT.JwtFilter;
 import com.joao.cafe.POJO.Bill;
-import com.joao.cafe.constents.CafeConstants;
+import com.joao.cafe.constants.CafeConstants;
 import com.joao.cafe.dao.BillDao;
 import com.joao.cafe.service.BillService;
 import com.joao.cafe.utils.CafeUtils;
